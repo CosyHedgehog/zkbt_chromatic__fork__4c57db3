@@ -83,6 +83,22 @@ def from_atoca(rainbow, filepath, order=1):
     for i_file, f in enumerate(tqdm(filenames, leave=False)):
         hdu_list = fits.open(f)
 
+        has_extract1d = False
+        for i in range(1, len(hdu_list)):
+            if hdu_list[i].header.get("EXTNAME") == "EXTRACT1D" and hdu_list[i].header.get("SPORDER") == order:
+                has_extract1d = True
+                break
+                
+        if not has_extract1d:
+            raise ValueError(
+                f"""
+                No 'EXTRACT1D' extension with order {order} found in the file:
+                {f}
+                
+                Make sure the file contains extractable spectra with the requested order.
+                """
+            )
+            
         # Useful initializations for later.
         quantities = {}
         first_time = True
